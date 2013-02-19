@@ -6,6 +6,28 @@
 ## get images to given coordinates/icerise
 ##
 
+## defaults
+do_rignot=false
+do_mamm=false
+do_ramp=false
+do_bamber=false
+
+while getopts x:y:h:rmpb o
+do    case "$o" in
+      x)    X="$OPTARG";;
+      y)    Y="$OPTARG";;
+      h)    HANDLE="$OPTARG";;
+      r)    do_rignot=true;;
+      m)    do_mamm=true;;
+      p)    do_ramp=true;;
+      b)    do_bamber=true;;
+      [?])  echo >&2 "Usage: $0 -x xcoord -y ycoord -h handle [rmpb]"
+            exit 1;;
+      esac
+done
+
+echo $do_rignot
+
 # boxlength
 WINDOW=10000
 
@@ -33,10 +55,9 @@ data_sets=/scratch/clisap/landice/data_sets
 output="./output"
 
 # set region
-./make_window.sh $1 $2 $WINDOW
+./make_window.sh $X $Y $WINDOW
 source reg.sh
 
-HANDLE=$3
 
 mamm_velo_loc="MAG_reg5.grd"
 
@@ -82,84 +103,94 @@ eps_bamber=$output/${HANDLE}_bamber.eps
 
 
 ## RIGNOT VELOCITY
-DATA="RIGNOT VELOCITY"
-echo $DATA
-
-makecpt -Crainbow -T10/350/3 -Qo -Z -M > $cpt2
-psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rignot
-grdimage /scratch/clisap/landice/data_sets/Rignot_velocities/MAG.grd $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_rignot
-
-## arrows
-#awk 'NR%5==0' /scratch/clisap/landice/data_sets/Rignot_velocities/arrow_dir.xyz | \
-#  psxy $REGION_pro_XY $REGION_reg_XY -SV0.003i/0.06i/0.05i -Gblack -O -K >> $eps_rignot
-
-## scale
-psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt2 -Ef -L  \
-        -B/:'m a@+-1@+':  -O -K >> $eps_rignot
-
-## lines
-psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_rignot
-psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_rignot
-psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_rignot
-
-## grid
-$polargrid_10_50km >> $eps_rignot
-
-## finish
-psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rignot
-echo "done"
+if [ "$do_rignot" = true ]; then
+  DATA="RIGNOT VELOCITY"
+  echo $DATA
+  
+  makecpt -Crainbow -T10/350/3 -Qo -Z -M > $cpt2
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rignot
+  grdimage /scratch/clisap/landice/data_sets/Rignot_velocities/MAG.grd $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_rignot
+  
+  ## arrows
+  #awk 'NR%5==0' /scratch/clisap/landice/data_sets/Rignot_velocities/arrow_dir.xyz | \
+  #  psxy $REGION_pro_XY $REGION_reg_XY -SV0.003i/0.06i/0.05i -Gblack -O -K >> $eps_rignot
+  
+  ## scale
+  psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt2 -Ef -L  \
+          -B/:'m a@+-1@+':  -O -K >> $eps_rignot
+  
+  ## lines
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_rignot
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_rignot
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_rignot
+  
+  ## grid
+  $polargrid_10_50km >> $eps_rignot
+  
+  ## finish
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rignot
+  echo "done"
+fi
 
 ## MAMM VELOCITY
-DATA="MAMM VELOCITY"
-echo $DATA
-
-makecpt -Crainbow -T0/3/1 -Qi -Z -M > $cpt2
-psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_mamm
-grdimage $data_sets/MAMM/work/$mamm_velo_loc $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_mamm
-
-psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_mamm
-psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_mamm
-psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_mamm
-
-## grid
-$polargrid_10_50km >> $eps_mamm
-psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_mamm
-echo "done"
+if [ "$do_mamm" = true ]; then
+  DATA="MAMM VELOCITY"
+  echo $DATA
+  
+  makecpt -Crainbow -T0/3/1 -Qi -Z -M > $cpt2
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_mamm
+  grdimage $data_sets/MAMM/work/$mamm_velo_loc $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_mamm
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_mamm
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_mamm
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_mamm
+  
+  ## grid
+  $polargrid_10_50km >> $eps_mamm
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_mamm
+  echo "done"
+fi
 
 ## RAMP
-DATA="RAMP"
-echo $data
-
-makecpt -Cgray -T0/255/1 > $cpt4
-psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_ramp
-grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_ramp
-
-psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampcoast  -O -K >> $eps_ramp
-psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampground  -O -K >> $eps_ramp
-psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,$rampisland  -O -K >> $eps_ramp
-
-## grid
-$polargrid_10_50km >> $eps_ramp
-psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
-echo "done"
+if [ "$do_ramp" = true ]; then
+  DATA="RAMP"
+  echo $data
+  
+  makecpt -Cgray -T0/255/1 > $cpt4
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_ramp
+  grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_ramp
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampcoast  -O -K >> $eps_ramp
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampground  -O -K >> $eps_ramp
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,$rampisland  -O -K >> $eps_ramp
+  
+  ## grid
+  $polargrid_10_50km >> $eps_ramp
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
+  echo "done"
+fi
 
 ## BAMBER DEM
-DATA="BAMBER DEM"
-echo $DATA
+if [ "$do_bamber" = true ]; then
+  DATA="BAMBER DEM"
+  echo $DATA
+  
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_bamber
+  grdimage $data_sets/Bamber_et_al_2009_1kmDEM/krigged_dem_nsidc.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_bamber
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_bamber
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_bamber
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_bamber
+  
+  psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+         "$scaleann"  -O -K >> $eps_bamber
+  
+  $polargrid_10_50km >> $eps_ramp
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
+  echo "done"
+fi
 
-psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_bamber
-grdimage $data_sets/Bamber_et_al_2009_1kmDEM/krigged_dem_nsidc.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_bamber
-
-psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_bamber
-psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_bamber
-psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_bamber
-
-psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
-       "$scaleann"  -O -K >> $eps_bamber
-
-$polargrid_10_50km >> $eps_ramp
-psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
-echo "done"
+## 
 
 
 ## clean
