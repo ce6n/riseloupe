@@ -12,8 +12,10 @@ do_mamm=false
 do_ramp=false
 do_bamber=false
 do_rampdem=false
+do_icesat=false
+do_icetrack=false
 
-while getopts x:y:h:rmpbR o
+while getopts x:y:h:rmpbRit o
 do    case "$o" in
       x)    X="$OPTARG";;
       y)    Y="$OPTARG";;
@@ -23,12 +25,13 @@ do    case "$o" in
       p)    do_ramp=true;;
       b)    do_bamber=true;;
       R)    do_rampdem=true;;
-      [?])  echo >&2 "Usage: $0 -x xcoord -y ycoord -h handle [rmpb]"
+      i)    do_icesat=true;;
+      t)    do_icetrack=true;;
+      [?])  echo -e >&2 `cat usage.txt`
             exit 1;;
       esac
 done
 
-echo $do_rignot
 
 # boxlength
 WINDOW=10000
@@ -102,7 +105,9 @@ eps_rignot=$output/${HANDLE}_rignot.eps
 eps_mamm=$output/${HANDLE}_mamm.eps
 eps_ramp=$output/${HANDLE}_ramp.eps
 eps_bamber=$output/${HANDLE}_bamber.eps
-eps_ramprem=$output/${HANDLE}_rampdem.eps
+eps_rampdem=$output/${HANDLE}_rampdem.eps
+eps_icesat=$output/${HANDLE}_icesat.eps
+eps_icetrack=$output/${HANDLE}_icetrack.eps
 
 
 ## RIGNOT VELOCITY
@@ -194,12 +199,12 @@ if [ "$do_bamber" = true ]; then
 fi
 
 ## RAMP DEM
-if [ "$do_ramdem" = true ]; then
+if [ "$do_rampdem" = true ]; then
   DATA="RAMP DEM"
   echo $data
   
   psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rampdem
-  grdimage $datasets//RAMP/RAMP200m_dem_v2/ramp200dem_wgs_v2.bin.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_rampdem
+  grdimage $data_sets/RAMP/RAMP200m_dem_v2/ramp200dem_wgs_v2.bin.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_rampdem
   
   psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_rampdem
   psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_rampdem
@@ -212,6 +217,54 @@ if [ "$do_ramdem" = true ]; then
   psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rampdem
   echo "done"
 fi
+
+## ICESAT DEM
+if [ "$do_icesat" = true ]; then
+  DATA="ICESAT DEM"
+  echo $DATA
+  
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_icesat
+  grdimage $data_sets/nsidc0304_icesat_antarctic_dem/NSIDC_Ant500m_wgs84_elev_m_S71.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_icesat
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_icesat
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_icesat
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_icesat
+  
+  psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+          "$scaleann"  -O -K >> $eps_icesat
+  
+  $polargrid_10_50km >> $eps_icesat
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_icesat
+  echo "done"
+fi
+
+## ICESAT TRACKS
+if [ "$do_icetrack" = true ]; then
+  DATA="ICESAT TRACKS"
+  echo $DATA
+  
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_icetrack
+  # ramp background
+  grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_icetrack
+  
+  # tracks
+  cat $data_sets/ICESat/ICESat_v33/GLAS_elev_shelf.asci | \
+      gmtconvert -F0,1,2 | \
+      psxy $REGION_pro_XY $REGION_reg_XY $reg_XY -Sp3p -C$cpt1 -O -K >> $eps_icetrack
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_icetrack
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_icetrack
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_icetrack
+  
+  psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+          "$scaleann"  -O -K >> $eps_icetrack
+  
+  $polargrid_10_50km >> $eps_icetrack
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_icetrack
+  echo "done"
+fi
+
+
 
 
 
