@@ -11,8 +11,9 @@ do_rignot=false
 do_mamm=false
 do_ramp=false
 do_bamber=false
+do_rampdem=false
 
-while getopts x:y:h:rmpb o
+while getopts x:y:h:rmpbR o
 do    case "$o" in
       x)    X="$OPTARG";;
       y)    Y="$OPTARG";;
@@ -21,6 +22,7 @@ do    case "$o" in
       m)    do_mamm=true;;
       p)    do_ramp=true;;
       b)    do_bamber=true;;
+      R)    do_rampdem=true;;
       [?])  echo >&2 "Usage: $0 -x xcoord -y ycoord -h handle [rmpb]"
             exit 1;;
       esac
@@ -100,6 +102,7 @@ eps_rignot=$output/${HANDLE}_rignot.eps
 eps_mamm=$output/${HANDLE}_mamm.eps
 eps_ramp=$output/${HANDLE}_ramp.eps
 eps_bamber=$output/${HANDLE}_bamber.eps
+eps_ramprem=$output/${HANDLE}_rampdem.eps
 
 
 ## RIGNOT VELOCITY
@@ -190,7 +193,26 @@ if [ "$do_bamber" = true ]; then
   echo "done"
 fi
 
-## 
+## RAMP DEM
+if [ "$do_ramdem" = true ]; then
+  DATA="RAMP DEM"
+  echo $data
+  
+  psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rampdem
+  grdimage $datasets//RAMP/RAMP200m_dem_v2/ramp200dem_wgs_v2.bin.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_rampdem
+  
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_rampdem
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_rampdem
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_rampdem
+  
+  psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+          "$scaleann"  -O -K >> $eps_rampdem
+  
+  $polargrid_10_50km >> $eps_rampdem
+  psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rampdem
+  echo "done"
+fi
+
 
 
 ## clean
