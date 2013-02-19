@@ -44,6 +44,10 @@ mamm_velo_loc="MAG_reg5.grd"
 coastcolor="grey"
 groundcolor="grey"
 rgroundcolor="232/124/26"
+## ramp colors
+rampcoast="80/148/209"
+rampground="96/132/170"
+rampisland="243/208/0"
 
 
 ## MAKE CPT
@@ -73,6 +77,7 @@ width=0.35
 ## output
 eps_rignot=$output/${HANDLE}_rignot.eps
 eps_mamm=$output/${HANDLE}_mamm.eps
+eps_ramp=$output/${HANDLE}_ramp.eps
 
 
 ## RIGNOT VELOCITY
@@ -120,16 +125,28 @@ $polargrid_10_50km >> $eps_mamm
 psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_mamm
 echo "done"
 
+## RAMP
+DATA="RAMP"
+echo $data
 
+makecpt -Cgray -T0/255/1 > $cpt4
+psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_ramp
+grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_ramp
 
+psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_ramp
+psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_ramp
+psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_ramp
 
-
-
+## grid
+$polargrid_10_50km >> $eps_ramp
+psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
+echo "done"
 
 
 ## clean
 
 rm *.cpt
+
 
 
 
