@@ -154,7 +154,7 @@ psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $ep
 psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_bamber
 psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_bamber
 
-pscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
        "$scaleann"  -O -K >> $eps_bamber
 
 $polargrid_10_50km >> $eps_ramp
