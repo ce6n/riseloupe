@@ -28,7 +28,7 @@ gmtset COLOR_NAN 170/170/170
 gmtset COLOR_FOREGROUND 70/0/0
 
 ########################################################################
-all_data_path=/scratch/clisap/landice
+data_sets=/scratch/clisap/landice/data_sets
 
 output="./output"
 
@@ -37,6 +37,8 @@ output="./output"
 source reg.sh
 
 HANDLE=$3
+
+mamm_velo_loc="MAG_reg5.grd"
 
 ## colors
 coastcolor="grey"
@@ -54,9 +56,9 @@ makecpt -Crainbow -T0/100/5 -Z > $cpt1
 
 
 ## LINES
-coastline="/scratch/clisap/landice/data_sets/MOA/MOA_lines/raw_data/coastlines/moa_coastline.gmt"
-groundingline="/scratch/clisap/landice/data_sets/MOA/MOA_lines/raw_data/coastlines/moa_groundingline.gmt"
-islands="/scratch/clisap/landice/data_sets/MOA/MOA_lines/raw_data/coastlines/moa_islands.gmt"
+coastline="$data_sets/MOA/MOA_lines/raw_data/coastlines/moa_coastline.gmt"
+groundingline="$data_sets/MOA/MOA_lines/raw_data/coastlines/moa_groundingline.gmt"
+islands="$data_sets/MOA/MOA_lines/raw_data/coastlines/moa_islands.gmt"
 
 ## BASEMAP GRIDS
 polargrid_10_50km="psbasemap $REGION_pro_XY $REGION_reg_XY_km "-Bg10a50/g10a50eSnW" -O -K"
@@ -70,10 +72,12 @@ width=0.35
 
 ## output
 eps_rignot=$output/${HANDLE}_rignot.eps
+eps_mamm=$output/${HANDLE}_mamm.eps
 
 
 ## RIGNOT VELOCITY
 DATA="RIGNOT VELOCITY"
+echo $DATA
 
 makecpt -Crainbow -T10/350/3 -Qo -Z -M > $cpt2
 psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rignot
@@ -98,6 +102,25 @@ $polargrid_10_50km >> $eps_rignot
 ## finish
 psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rignot
 echo "done"
+
+## MAMM VELOCITY
+DATA="MAMM VELOCITY"
+echo $DATA
+
+makecpt -Crainbow -T0/3/1 -Qi -Z -M > $cpt2
+psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_mamm
+grdimage $data_sets/MAMM/work/$mamm_velo_loc $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_mamm
+
+psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_mamm
+psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_mamm
+psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_mamm
+
+## grid
+$polargrid_10_50km >> $eps_mamm
+psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_mamm
+echo "done"
+
+
 
 
 
