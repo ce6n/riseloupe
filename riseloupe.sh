@@ -78,6 +78,7 @@ width=0.35
 eps_rignot=$output/${HANDLE}_rignot.eps
 eps_mamm=$output/${HANDLE}_mamm.eps
 eps_ramp=$output/${HANDLE}_ramp.eps
+eps_bamber=$output/${HANDLE}_bamber.eps
 
 
 ## RIGNOT VELOCITY
