@@ -36,6 +36,7 @@ output="./output"
 ./make_window.sh $1 $2 $WINDOW
 source reg.sh
 
+HANDLE=$3
 
 ## colors
 coastcolor="grey"
@@ -63,29 +64,24 @@ polargrid_10_50km="psbasemap $REGION_pro_XY $REGION_reg_XY_km "-Bg10a50/g10a50eS
 
 ## scalebars
 ypos=`echo $REGION_sy/2 | bc`
-
 xpos=20.5
-
 scaleann="-Bf5a10:::,:/f5a10:m::,::.:ws"
-
 width=0.35
 
 ## output
-eps_rignot=$output/rignot.eps
+eps_rignot=$output/${HANDLE}_rignot.eps
 
 
 ## RIGNOT VELOCITY
-echo "RIGNOT VELOCITY"
+DATA="RIGNOT VELOCITY"
 
 makecpt -Crainbow -T10/350/3 -Qo -Z -M > $cpt2
-
-psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$1 $2 - RIGNOT VELOCITY": -K  > $eps_rignot
-
+psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_rignot
 grdimage /scratch/clisap/landice/data_sets/Rignot_velocities/MAG.grd $REGION_pro_XY $REGION_reg_XY -C$cpt2 -Q -O -K >> $eps_rignot
 
 ## arrows
-awk 'NR%5==0' /scratch/clisap/landice/data_sets/Rignot_velocities/arrow_dir.xyz | \
-  psxy $REGION_pro_XY $REGION_reg_XY -SV0.003i/0.06i/0.05i -Gblack -O -K >> $eps_rignot
+#awk 'NR%5==0' /scratch/clisap/landice/data_sets/Rignot_velocities/arrow_dir.xyz | \
+#  psxy $REGION_pro_XY $REGION_reg_XY -SV0.003i/0.06i/0.05i -Gblack -O -K >> $eps_rignot
 
 ## scale
 psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt2 -Ef -L  \
@@ -96,15 +92,11 @@ psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $ep
 psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_rignot
 psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_rignot
 
-
-
-
-
 ## grid
 $polargrid_10_50km >> $eps_rignot
 
+## finish
 psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_rignot
-
 echo "done"
 
 
