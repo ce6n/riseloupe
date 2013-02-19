@@ -133,11 +133,29 @@ makecpt -Cgray -T0/255/1 > $cpt4
 psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_ramp
 grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_ramp
 
-psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_ramp
-psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_ramp
-psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_ramp
+psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampcoast  -O -K >> $eps_ramp
+psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampground  -O -K >> $eps_ramp
+psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,$rampisland  -O -K >> $eps_ramp
 
 ## grid
+$polargrid_10_50km >> $eps_ramp
+psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
+echo "done"
+
+## BAMBER DEM
+DATA="BAMBER DEM"
+echo $DATA
+
+psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_bamber
+grdimage $data_sets/Bamber_et_al_2009_1kmDEM/krigged_dem_nsidc.grd $REGION_pro_XY $REGION_reg_XY -C$cpt1 -Q -O -K >> $eps_bamber
+
+psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_bamber
+psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_bamber
+psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_bamber
+
+pscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
+       "$scaleann"  -O -K >> $eps_bamber
+
 $polargrid_10_50km >> $eps_ramp
 psxy -R0/1/0/1 -JX1 -O /dev/null >> $eps_ramp
 echo "done"
