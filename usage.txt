@@ -1,0 +1,12 @@
+Usage: Usage: $0 -x xcoord -y ycoord -h handle [-r] [-m] [-p] [-b] [-R] [-i] [-t] \n
+    -x      x coordinate in polarstereographic EPSG3031 \n
+    -y      y coordinate in polarstereographic EPSG3031 \n
+    -h      name for figures and title \n
+\n
+    -r      Rignot velocities \n
+    -m      Mamm velocities \n
+    -p      Ramp radasat image \n
+    -b      Bamber DEM \n
+    -R      Ramp DEM \n
+    -i      Icesat DEM \n
+    -t      Icesat tracks only \n

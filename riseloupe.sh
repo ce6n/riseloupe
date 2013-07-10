@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+
 ##
 ## riseloupe
 ## get images to given coordinates/icerise
@@ -245,6 +246,7 @@ if [ "$do_icetrack" = true ]; then
   
   psbasemap $REGION_pro_XY $REGION_reg_XY -B0:."$HANDLE - $DATA": -K  > $eps_icetrack
   # ramp background
+  makecpt -Cgray -T0/255/1 > $cpt4
   grdimage $data_sets/RAMP/geoTIF_V2/amm125m_v2_200m.grd $REGION_pro_XY $REGION_reg_XY -C$cpt4 -Q -O -K >> $eps_icetrack
   
   # tracks
@@ -252,9 +254,9 @@ if [ "$do_icetrack" = true ]; then
       gmtconvert -F0,1,2 | \
       psxy $REGION_pro_XY $REGION_reg_XY $reg_XY -Sp3p -C$cpt1 -O -K >> $eps_icetrack
   
-  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$coastcolor  -O -K >> $eps_icetrack
-  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$groundcolor  -O -K >> $eps_icetrack
-  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,black  -O -K >> $eps_icetrack
+  psxy $coastline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampcoast  -O -K >> $eps_icetrack
+  psxy $groundingline -M $REGION_pro_XY $REGION_reg_XY  -W2p,$rampground  -O -K >> $eps_icetrack
+  psxy $islands -M $REGION_pro_XY $REGION_reg_XY  -W1p,$rampisland  -O -K >> $eps_icetrack
   
   psscale -D$xpos/$ypos/$REGION_sy/$width -C$cpt1 -Ef  \
           "$scaleann"  -O -K >> $eps_icetrack
